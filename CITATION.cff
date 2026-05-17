@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software in your work, please cite it using the metadata below."
+type: software
+title: "Claude Ads"
+abstract: >
+  Comprehensive paid advertising audit and optimization skill for Claude Code.
+  Covers Google Ads, Meta Ads, YouTube Ads, LinkedIn Ads, TikTok Ads, Microsoft
+  Ads, and Apple Ads with 250+ audit checks, industry-specific templates,
+  and parallel subagent delegation.
+authors:
+  - alias: AgriciDaniel
+    name-particle: ""
+repository-code: "https://github.com/AgriciDaniel/claude-ads"
+url: "https://github.com/AgriciDaniel/claude-ads"
+license: MIT
+version: "1.5.1"
+date-released: "2026-04-14"
+keywords:
+  - paid advertising
+  - google ads
+  - meta ads
+  - ppc
+  - advertising audit
+  - claude code
+  - llm tool
