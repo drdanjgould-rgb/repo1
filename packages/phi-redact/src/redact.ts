@@ -8,7 +8,23 @@ import {
   redactPhone,
   redactZip,
 } from './patterns/index.js';
-import type { PassContext, RedactionResult, RedactOptions } from './types.js';
+import type { PassContext, PhiKind, RedactionResult, RedactOptions } from './types.js';
+
+const TOKEN_RE = /^<<PHI_([A-Z]+)_(\d{3,})>>$/;
+
+function seedContext(ctx: PassContext, existingMap: Record<string, string>): void {
+  for (const [token, original] of Object.entries(existingMap)) {
+    const m = TOKEN_RE.exec(token);
+    if (!m || m[1] === undefined || m[2] === undefined) continue;
+    const kind = m[1] as PhiKind;
+    const n = Number.parseInt(m[2], 10);
+    if (!Number.isFinite(n)) continue;
+    ctx.map[token] = original;
+    ctx.reverse.set(original, token);
+    const prev = ctx.counters.get(kind) ?? 0;
+    if (n > prev) ctx.counters.set(kind, n);
+  }
+}
 
 /**
  * Redact PHI/PII from `text`, returning the redacted string and a map of
@@ -37,6 +53,9 @@ export function redact(text: string, options?: RedactOptions): RedactionResult {
     map: {},
     blocklist,
   };
+  if (options?.existingMap) {
+    seedContext(ctx, options.existingMap);
+  }
 
   let result = redactEmail(text, ctx);
   result = redactPhone(result, ctx);

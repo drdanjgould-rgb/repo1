@@ -23,6 +23,17 @@ export interface RedactOptions {
    * false-positive sources like brand names ("John Deere", "Pat Robertson").
    */
   blocklist?: string[];
+
+  /**
+   * An existing map of tokens to originals. When set, repeated originals
+   * across multiple `redact()` calls reuse the same tokens, and new
+   * originals continue the counter from where this map leaves off.
+   *
+   * Used by `@contourai/agents` to redact a multi-turn conversation
+   * consistently: "Sarah" mentioned in turn 2 and turn 5 produces the
+   * same `<<PHI_NAME_001>>` token so the model sees one referent.
+   */
+  existingMap?: RedactionMap;
 }
 
 /**
