@@ -1,0 +1,30 @@
+{
+  "name": "@contourai/worker-concierge",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo",
+    "dev": "tsx watch src/cli.ts",
+    "cli": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@contourai/agents": "workspace:*",
+    "@contourai/safety": "workspace:*",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

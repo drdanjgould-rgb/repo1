@@ -1,4 +1,4 @@
-import type { LLMTransport, MessagesRequest, MessagesResponse } from '../src/types.js';
+import type { LLMTransport, MessagesRequest, MessagesResponse } from '../types.js';
 
 /**
  * Test double for `LLMTransport`. Records every call and returns a

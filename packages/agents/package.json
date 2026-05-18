@@ -8,7 +8,8 @@
     "./client": "./src/client.ts",
     "./prompts": "./src/prompts/index.ts",
     "./tools": "./src/tools/index.ts",
-    "./safety": "./src/safety/index.ts"
+    "./safety": "./src/safety/index.ts",
+    "./test-utils": "./src/test-utils/index.ts"
   },
   "scripts": {
     "build": "tsc -b",

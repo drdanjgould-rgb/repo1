@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ClaudeClient } from '../src/client.js';
 import type { AgentLogger, LogEntry } from '../src/types.js';
-import { FakeTransport } from './fake-transport.js';
+import { FakeTransport } from '../src/test-utils/fake-transport.js';
 
 describe('ClaudeClient — redact on send', () => {
   it('redacts PHI in user messages before passing to the transport', async () => {

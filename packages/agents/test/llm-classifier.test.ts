@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ClaudeClient } from '../src/client.js';
 import { LLMSafetyClassifier } from '../src/safety/llm-classifier.js';
-import { FakeTransport } from './fake-transport.js';
+import { FakeTransport } from '../src/test-utils/fake-transport.js';
 
 function buildClassifier(...llmReplies: Array<Record<string, unknown>>): {
   classifier: LLMSafetyClassifier;
