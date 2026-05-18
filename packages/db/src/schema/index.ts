@@ -5,4 +5,5 @@ export * from './conversations';
 export * from './messages';
 export * from './leads';
 export * from './lead-scores';
+export * from './escalations';
 export * from './audit-log';

@@ -2,18 +2,26 @@
   "version": "7",
   "dialect": "postgresql",
   "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1779068928375,
-      "tag": "0000_initial",
-      "breakpoints": true
-    },
+    { "idx": 0, "version": "7", "when": 1779068928375, "tag": "0000_initial", "breakpoints": true },
     {
       "idx": 1,
       "version": "7",
       "when": 1779068928376,
       "tag": "0001_rls_and_audit",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779077526667,
+      "tag": "0002_escalations",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779077526668,
+      "tag": "0003_escalations_security",
       "breakpoints": false
     }
   ]

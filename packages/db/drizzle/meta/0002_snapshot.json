@@ -1,6 +1,6 @@
 {
-  "id": "6b32c522-4f19-4c81-9935-b3a6b2f2dbc2",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "2cbaa707-fbdb-4679-b19a-6f56f1735f73",
+  "prevId": "6b32c522-4f19-4c81-9935-b3a6b2f2dbc2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -791,6 +791,167 @@
       },
       "isRLSEnabled": false
     },
+    "public.escalations": {
+      "name": "escalations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "clinic_id": {
+          "name": "clinic_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "conversation_id": {
+          "name": "conversation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message_id": {
+          "name": "message_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "escalation_reason",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "escalation_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'none'"
+        },
+        "severity": {
+          "name": "severity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 3
+        },
+        "rationale": {
+          "name": "rationale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notified_at": {
+          "name": "notified_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "escalations_open_clinic_idx": {
+          "name": "escalations_open_clinic_idx",
+          "columns": [
+            {
+              "expression": "clinic_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at DESC",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "escalations_clinic_id_clinics_id_fk": {
+          "name": "escalations_clinic_id_clinics_id_fk",
+          "tableFrom": "escalations",
+          "tableTo": "clinics",
+          "columnsFrom": ["clinic_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "escalations_conversation_id_conversations_id_fk": {
+          "name": "escalations_conversation_id_conversations_id_fk",
+          "tableFrom": "escalations",
+          "tableTo": "conversations",
+          "columnsFrom": ["conversation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "escalations_patient_id_patients_id_fk": {
+          "name": "escalations_patient_id_patients_id_fk",
+          "tableFrom": "escalations",
+          "tableTo": "patients",
+          "columnsFrom": ["patient_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "escalations_message_id_messages_id_fk": {
+          "name": "escalations_message_id_messages_id_fk",
+          "tableFrom": "escalations",
+          "tableTo": "messages",
+          "columnsFrom": ["message_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "escalations_severity_range": {
+          "name": "escalations_severity_range",
+          "value": "\"escalations\".\"severity\" BETWEEN 1 AND 5"
+        }
+      },
+      "isRLSEnabled": false
+    },
     "public.audit_log": {
       "name": "audit_log",
       "schema": "",
@@ -943,6 +1104,16 @@
       "name": "lead_tier",
       "schema": "public",
       "values": ["hot", "warm", "cold", "blocked"]
+    },
+    "public.escalation_category": {
+      "name": "escalation_category",
+      "schema": "public",
+      "values": ["medical_emergency", "post_op_complication", "mental_health", "none"]
+    },
+    "public.escalation_reason": {
+      "name": "escalation_reason",
+      "schema": "public",
+      "values": ["red_flag_medical", "human_handoff_request", "complaint", "compliance", "other"]
     }
   },
   "schemas": {},

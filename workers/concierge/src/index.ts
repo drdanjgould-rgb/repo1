@@ -14,3 +14,4 @@ export {
   type ScoringWeights,
   type BannedPhraseFilterResult,
 } from './handlers/index.js';
+export { createPinoAgentLogger, type PinoAgentLoggerOptions } from './logger.js';
