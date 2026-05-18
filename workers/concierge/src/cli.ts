@@ -13,6 +13,7 @@ import { existsSync } from 'node:fs';
 import readline from 'node:readline/promises';
 import { ClaudeClient, createAnthropicTransport, type AgentLogger } from '@contourai/agents';
 import { createConciergeAgent } from './agent.js';
+import { checkOutbound } from './handlers/banned-filter.js';
 
 for (const path of ['.env.local', '.env']) {
   if (existsSync(path)) loadEnv({ path, override: false });
@@ -86,6 +87,17 @@ async function main(): Promise<void> {
           `\n  ⚠  Safety triage: ${verdict.category} (severity ${verdict.severity})\n` +
             `     ${verdict.rationale}\n`,
         );
+      } else {
+        // Run the post-generation banned-phrase filter. CLI mode just
+        // warns; production worker decides whether to send a holding
+        // reply or block.
+        const checked = checkOutbound(text);
+        if (!checked.ok) {
+          process.stdout.write(
+            `\n  ⚠  Banned phrase in reply: "${checked.hit.phrase}" at offset ${checked.hit.index}\n` +
+              `     Edit the system prompt in src/prompt.ts to suppress it.\n`,
+          );
+        }
       }
       process.stdout.write(`\nConcierge> ${text}\n`);
     } catch (err) {
