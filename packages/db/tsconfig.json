@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./",
+    "tsBuildInfoFile": "./.tsbuildinfo",
+    // drizzle-kit's CLI loads the schema as CJS via require(); NodeNext +
+    // explicit .js suffixes on imports don't survive that loader. Use
+    // bundler resolution here (tsx still handles runtime).
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "verbatimModuleSyntax": false,
+    "allowImportingTsExtensions": false
+  },
+  "include": ["src/**/*", "test/**/*", "drizzle.config.ts"],
+  "exclude": ["dist", "node_modules", "drizzle/**/*"]
+}
