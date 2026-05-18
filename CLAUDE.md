@@ -1,81 +1,101 @@
-# Claude Ads: Paid Advertising Audit & Optimization Skill
+# ContourAI — Engineering Conventions
 
-## Project Overview
+These are the rules every contributor (human or agent) follows when working
+in this repo. Project overview lives in `README.md`; this file is conventions
+only.
 
-This repository contains **Claude Ads**, a Tier 4 Claude Code skill for comprehensive
-paid advertising analysis across all major platforms. It follows the Agent Skills open
-standard and the 3-layer architecture (directive, orchestration, execution). 19 sub-skills,
-10 agents (6 audit + 4 creative), and 12 industry templates cover Google, Meta, YouTube, LinkedIn,
-TikTok, Microsoft, and Apple Ads with 250+ weighted audit checks.
+## Stack snapshot
 
-## Architecture
+- TypeScript, Node 20, pnpm + Turborepo.
+- Hono (API), Inngest (workflows), Drizzle (DB), Supabase (Postgres + Auth + Vault).
+- Anthropic Claude — **Sonnet 4.6** (generation), **Haiku 4.5** (intent
+  classification), **Opus 4.7** (safety classifier).
+- Pino → Axiom logs. PostHog product analytics. Vitest tests.
 
-```
-claude-ads/
-  CLAUDE.md                          # Project instructions (this file)
-  ads/                               # Main orchestrator skill
-    SKILL.md                         # Entry point, routing table, core rules
-    references/                      # On-demand knowledge files (25 files)
-    scripts/                         # Python execution scripts
-  skills/                            # 19 specialized sub-skills
-    ads-audit/SKILL.md              # Full multi-platform audit
-    ads-google/SKILL.md            # Google Ads deep analysis
-    ads-meta/SKILL.md              # Meta/Facebook Ads analysis
-    ads-youtube/SKILL.md           # YouTube Ads analysis
-    ads-linkedin/SKILL.md         # LinkedIn Ads analysis
-    ads-tiktok/SKILL.md           # TikTok Ads analysis
-    ads-microsoft/SKILL.md        # Microsoft/Bing Ads analysis
-    ads-creative/SKILL.md         # Creative quality assessment
-    ads-landing/SKILL.md          # Landing page analysis
-    ads-budget/SKILL.md           # Budget allocation optimization
-    ads-plan/SKILL.md             # Strategic ad planning by industry
-    ads-competitor/SKILL.md       # Competitor ad research
-  agents/                            # 10 agents (6 audit + 4 creative)
-    audit-google.md                # Google Ads audit agent
-    audit-meta.md                  # Meta Ads audit agent
-    audit-creative.md              # Creative quality agent
-    audit-tracking.md              # Conversion tracking agent
-    audit-budget.md                # Budget analysis agent
-    audit-compliance.md            # Compliance verification agent
-  install.sh / install.ps1          # Cross-platform installers
-  uninstall.sh / uninstall.ps1      # Cross-platform uninstallers
-```
+## Code conventions
 
-## Commands
+- **TypeScript strict.** No `any` without an inline `// eslint-disable-next-line
+@typescript-eslint/no-explicit-any -- <reason>` comment. The reason must
+  describe why a typed alternative isn't viable, not just "needed to compile."
+- **Pure functions where possible.** Side effects isolated to adapters under
+  `packages/integrations/`.
+- **No raw `fetch` in business logic.** Every external call goes through a
+  typed client in `packages/integrations/`.
+- **Errors are never silently caught.** Use a `Result<T, E>` pattern or rethrow
+  with context. `catch (e) {}` is an ESLint error.
+- **Structured logging via Pino.** Every log line carries `clinic_id`,
+  `conversation_id`, and `module`. PHI never appears in logs — the redaction
+  layer (`packages/phi-redact`) runs before any log call that includes message
+  content.
+- **No `console.log` in committed code.** Use the structured logger.
 
-| Command | Purpose |
-|---------|---------|
-| `/ads audit` | Full multi-platform audit with 6 parallel agents |
-| `/ads google` | Google Ads deep analysis |
-| `/ads meta` | Meta/Facebook Ads analysis |
-| `/ads youtube` | YouTube Ads analysis |
-| `/ads linkedin` | LinkedIn Ads analysis |
-| `/ads tiktok` | TikTok Ads analysis |
-| `/ads microsoft` | Microsoft/Bing Ads analysis |
-| `/ads creative` | Creative quality and fatigue assessment |
-| `/ads landing` | Landing page conversion analysis |
-| `/ads budget` | Budget allocation optimization |
-| `/ads plan <type>` | Strategic ad planning by industry |
-| `/ads competitor` | Competitor ad research |
-| `/ads math` | PPC financial calculator (CPA, ROAS, break-even, LTV:CAC) |
-| `/ads test` | A/B test design (hypothesis, significance, sample size) |
-| `/ads report` | PDF audit report generation for client deliverables |
+## PHI & safety rules (non-negotiable)
 
-## Development Rules
+- All PHI is redacted via `packages/phi-redact` before any external LLM call,
+  any log line containing message content, or any analytics event.
+- Every outbound patient-facing message is persisted with `{prompt, completion,
+model, latency_ms, redaction_map}` to the `messages` table.
+- The safety classifier in `packages/safety` runs on every inbound message in
+  every module. A red-flag verdict short-circuits the agent and escalates to
+  staff.
+- **No invented clinical claims.** If the knowledge base doesn't cover a
+  question, escalate to staff queue with a holding message — never improvise.
+- **No prices over DM.** Enforced in three layers: system prompt, eval
+  banned-phrase scan, post-generation regex filter.
+- **Banned phrases** (system-wide): "transformation," "reset," "anti-aging,"
+  "best version of yourself," "journey," "rejuvenate" as a standalone claim.
+  Maintained centrally in `packages/safety/banned-phrases.ts`.
 
-- Keep SKILL.md files under 500 lines / 5000 tokens
-- Reference files should be focused and under 200 lines
-- Scripts must have docstrings, CLI interface, and JSON output
-- Follow kebab-case naming for all skill directories
-- Agents invoked via Task tool with `context: fork`, never via Bash
-- No hardcoded credentials; use MCP servers for external API access
+## Tests
 
-## Release Blog Post
+- Vitest. Every package ships at least a smoke test before merge.
+- PHI redaction has its own ≥25-pattern suite. Adversarial cases (real-name
+  false negatives, false-positive non-PHI like "John Deere") are required.
+- Safety classifier evals are gating: 100% red-flag recall is required to
+  merge any change to `packages/safety` or any agent prompt that affects
+  routing.
+- Module eval suites run in CI and gate live-webhook wire-up. A module is
+  not "done" until its eval suite is green.
 
-After cutting a new release (git tag + `gh release create`), run:
+## Logging schema
 
-```
-/release-blog
+Every log entry includes:
+
+```ts
+{ clinic_id?: string; conversation_id?: string; module: string; level: ...; msg: string }
 ```
 
-This generates a blog post on https://agricidaniel.com/blog/, handles cover image generation, SEO metadata, FAQ schema, internal linking, sitemap/llms.txt updates, Vercel deployment, and Google indexing.
+`module` is the package or worker name (e.g., `'workers/concierge'`,
+`'packages/safety'`). Add other context fields freely; never include raw
+message content unless it has been through `redact()`.
+
+## Commits
+
+- Conventional Commits: `feat(scope): summary`, `fix(scope): summary`, etc.
+- One branch per module. Branch name `module/<slug>` or `feat/<slug>`.
+- Pre-commit hook runs `lint-staged` (eslint + prettier on touched files)
+  and `pnpm typecheck`. If typecheck becomes slow, move it to CI; never
+  bypass with `--no-verify` without surfacing it in the PR description.
+
+## Working with Claude Code in this repo
+
+- This file (`CLAUDE.md`) and `README.md` are the canonical project context.
+  Skill files under `ads/`, `skills/`, `agents/`, `evals/`, `research/`,
+  `scripts/`, `assets/` belong to a prior repo identity (Claude Ads skill)
+  and are **not** part of ContourAI. Ignore them when reasoning about this
+  codebase.
+- The `contourai/` subdirectory is a legacy Python scaffold from an early
+  design pass. Reference only; do not extend.
+- The active codebase is the TS monorepo at the repo root (`apps/`,
+  `packages/`, `workers/`, `infra/`).
+
+## Sub-paths get their own CLAUDE.md as packages mature
+
+- `packages/phi-redact/CLAUDE.md` — redaction rules, performance budget,
+  threat model.
+- `packages/safety/CLAUDE.md` — red-flag taxonomy, model choice rationale,
+  escalation contract.
+- `workers/concierge/CLAUDE.md` — voice, tone, banned phrases, knowledge
+  base contract.
+
+These land as the packages do; they are not pre-created.

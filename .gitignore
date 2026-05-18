@@ -33,8 +33,23 @@ client_secret*.json
 __pycache__/
 *.pyc
 
-# Node (if ever needed for tooling)
+# Node / TS monorepo (ContourAI)
 node_modules/
+.turbo/
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+.eslintcache
+coverage/
+
+# Local dev env (per-app .env.local files override .env.example)
+.env.local
+.env.*.local
+
+# pnpm
+.pnpm-store/
 
 # Output reports (generated at runtime, not part of the skill)
 ADS-AUDIT-REPORT.md
