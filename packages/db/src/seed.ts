@@ -9,8 +9,8 @@
  */
 import 'dotenv/config';
 import { eq } from 'drizzle-orm';
-import { createClient } from './client';
-import { clinics, users } from './schema';
+import { createClient } from './client.js';
+import { clinics, users } from './schema/index.js';
 
 const GOULD_SLUG = 'gould-plastic-surgery';
 const GOULD_OWNER_EMAIL = 'daniel@gouldplasticsurgery.com';

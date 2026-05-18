@@ -10,9 +10,9 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { clinics } from './clinics';
-import { conversations } from './conversations';
-import { bytea } from './_types';
+import { clinics } from './clinics.js';
+import { conversations } from './conversations.js';
+import { bytea } from './_types.js';
 
 export const messageDirection = pgEnum('message_direction', ['inbound', 'outbound']);
 export type MessageDirection = (typeof messageDirection.enumValues)[number];

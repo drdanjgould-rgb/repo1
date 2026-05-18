@@ -4,11 +4,26 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts",
-    "./client": "./src/client.ts",
-    "./repos": "./src/repos/index.ts",
-    "./test-utils": "./src/repos/test-utils/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "default": "./dist/schema/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./repos": {
+      "types": "./dist/repos/index.d.ts",
+      "default": "./dist/repos/index.js"
+    },
+    "./test-utils": {
+      "types": "./dist/repos/test-utils/index.d.ts",
+      "default": "./dist/repos/test-utils/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -b",
@@ -17,7 +32,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf dist .turbo *.tsbuildinfo",
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "tsc -b && drizzle-kit generate",
     "db:migrate": "tsx src/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/seed.ts",

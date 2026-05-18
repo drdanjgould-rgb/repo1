@@ -16,6 +16,7 @@
     "test": "turbo run test",
     "dev:concierge": "pnpm --filter @contourai/worker-concierge dev",
     "cli:concierge": "pnpm --filter @contourai/worker-concierge cli",
+    "demo:orchestrator": "pnpm --filter @contourai/worker-concierge demo",
     "eval:concierge": "pnpm --filter @contourai/evals eval:concierge",
     "clean": "turbo run clean && rm -rf node_modules .turbo",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\"",

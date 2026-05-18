@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { check, index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { clinics } from './clinics';
-import { leads } from './leads';
+import { clinics } from './clinics.js';
+import { leads } from './leads.js';
 
 /**
  * Append-only score history. Every score change writes a row here with the

@@ -1,5 +1,5 @@
 import { pgTable, pgEnum, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
-import { clinics } from './clinics';
+import { clinics } from './clinics.js';
 
 export const userRole = pgEnum('user_role', ['owner', 'admin', 'staff', 'viewer']);
 export type UserRole = (typeof userRole.enumValues)[number];

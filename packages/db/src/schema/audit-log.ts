@@ -1,6 +1,6 @@
 import { bigserial, index, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { clinics } from './clinics';
+import { clinics } from './clinics.js';
 
 /**
  * Append-only audit trail. Populated by Postgres triggers attached to every

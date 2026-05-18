@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { index, pgTable, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
-import { clinics } from './clinics';
-import { bytea } from './_types';
+import { clinics } from './clinics.js';
+import { bytea } from './_types.js';
 
 /**
  * Patients (PHI). All identifying fields are encrypted at the application

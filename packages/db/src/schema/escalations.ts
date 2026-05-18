@@ -1,9 +1,9 @@
 import { check, integer, pgEnum, pgTable, text, timestamp, uuid, index } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { clinics } from './clinics';
-import { conversations } from './conversations';
-import { messages } from './messages';
-import { patients } from './patients';
+import { clinics } from './clinics.js';
+import { conversations } from './conversations.js';
+import { messages } from './messages.js';
+import { patients } from './patients.js';
 
 export const escalationReason = pgEnum('escalation_reason', [
   'red_flag_medical',

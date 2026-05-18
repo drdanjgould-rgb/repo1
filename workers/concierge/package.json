@@ -14,10 +14,14 @@
     "test:watch": "vitest",
     "clean": "rm -rf dist .turbo *.tsbuildinfo",
     "dev": "tsx watch src/cli.ts",
-    "cli": "tsx src/cli.ts"
+    "cli": "tsx src/cli.ts",
+    "demo": "tsx src/scripts/demo-orchestrator.ts"
   },
   "dependencies": {
     "@contourai/agents": "workspace:*",
+    "@contourai/db": "workspace:*",
+    "@contourai/integrations": "workspace:*",
+    "@contourai/phi-redact": "workspace:*",
     "@contourai/safety": "workspace:*",
     "dotenv": "^16.4.5",
     "pino": "^9.5.0"

@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
-import { clinics } from './clinics';
-import { patients } from './patients';
+import { clinics } from './clinics.js';
+import { patients } from './patients.js';
 
 export const conversationPlatform = pgEnum('conversation_platform', [
   'instagram',

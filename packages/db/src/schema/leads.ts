@@ -1,7 +1,7 @@
 import { check, index, integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { clinics } from './clinics';
-import { patients } from './patients';
+import { clinics } from './clinics.js';
+import { patients } from './patients.js';
 
 export const leadStatus = pgEnum('lead_status', ['open', 'contacted', 'converted', 'lost']);
 export type LeadStatus = (typeof leadStatus.enumValues)[number];

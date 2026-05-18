@@ -15,3 +15,9 @@ export {
   type BannedPhraseFilterResult,
 } from './handlers/index.js';
 export { createPinoAgentLogger, type PinoAgentLoggerOptions } from './logger.js';
+export {
+  handleInboundDM,
+  type InboundDMEvent,
+  type OrchestratorDeps,
+  type HandleResult,
+} from './handlers/handle-inbound-dm.js';

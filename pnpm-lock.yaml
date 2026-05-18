@@ -178,6 +178,15 @@ importers:
       '@contourai/agents':
         specifier: workspace:*
         version: link:../../packages/agents
+      '@contourai/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@contourai/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
+      '@contourai/phi-redact':
+        specifier: workspace:*
+        version: link:../../packages/phi-redact
       '@contourai/safety':
         specifier: workspace:*
         version: link:../../packages/safety
