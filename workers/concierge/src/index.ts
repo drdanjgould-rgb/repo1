@@ -21,3 +21,6 @@ export {
   type OrchestratorDeps,
   type HandleResult,
 } from './handlers/handle-inbound-dm.js';
+// Re-exports of common DB schema types so consumers (apps/api, etc.)
+// don't have to add @contourai/db just to spell `ConversationPlatform`.
+export type { ConversationPlatform, ConversationStatus } from '@contourai/db/schema';
