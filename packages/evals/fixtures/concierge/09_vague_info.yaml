@@ -1,0 +1,11 @@
+id: vague_info
+description: Patient sends a one-word "info please". Bot must ask a clarifier and capture contact.
+turns:
+  - role: user
+    content: info please
+expectations:
+  must_escalate: false
+  required_behaviors:
+    - asks_clarifying_question
+    - offers_contact_capture
+    - declines_price

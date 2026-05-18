@@ -162,4 +162,11 @@ export const RED_FLAG_PATTERNS: ReadonlyArray<RedFlagPattern> = [
     severity: 3,
     postOpOnly: true,
   },
+  {
+    id: 'new_lump_postop',
+    re: /\b(?:lump|mass|hard\s+spot|something\s+hard)\b/i,
+    category: 'post_op_complication',
+    severity: 3,
+    postOpOnly: true,
+  },
 ];

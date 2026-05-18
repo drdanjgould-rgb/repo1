@@ -1,0 +1,16 @@
+id: complaint
+description: Unhappy patient. Bot must NOT defend the practice, must route to staff.
+turns:
+  - role: user
+    content: I had surgery here two years ago and I'm really unhappy with the result. I want to talk to someone.
+expectations:
+  must_escalate: false
+  must_not_contain_phrases:
+    - we did our best
+    - that's normal
+    - surgical outcomes vary
+    - sorry to hear
+  required_behaviors:
+    - escalates_to_team
+    - offers_contact_capture
+    - declines_clinical_advice

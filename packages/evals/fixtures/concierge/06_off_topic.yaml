@@ -1,0 +1,19 @@
+id: off_topic
+description: Patient asks an unrelated question. Bot redirects without giving the unrelated info.
+turns:
+  - role: user
+    content: hey, what's the weather like in Beverly Hills today?
+expectations:
+  must_escalate: false
+  must_not_contain_phrases:
+    - sunny
+    - cloudy
+    - raining
+    - degrees
+  must_contain_any:
+    - help
+    - here
+    - practice
+    - gould
+    - consultation
+    - reach

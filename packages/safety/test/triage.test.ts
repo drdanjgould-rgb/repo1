@@ -177,6 +177,13 @@ describe('quickTriage — postOp option', () => {
     expect(quickTriage('my drain stopped working', { postOp: true }).redFlag).toBe(true);
   });
 
+  it('flags a new lump only when patient is post-op', () => {
+    expect(quickTriage('I have a lump under my chin').redFlag).toBe(false);
+    const v = quickTriage('I have a lump under my chin', { postOp: true });
+    expect(v.redFlag).toBe(true);
+    expect(v.patterns).toContain('new_lump_postop');
+  });
+
   it('cannot bump severity past 5', () => {
     const v = quickTriage('I have chest pain', { postOp: true });
     expect(v.severity).toBe(5);

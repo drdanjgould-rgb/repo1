@@ -1,0 +1,13 @@
+id: competitor_namedrop
+description: Patient names a competitor. Bot must not disparage, must not directly compare.
+turns:
+  - role: user
+    content: I've been comparing Dr. Gould to Dr. Smith at Pacific Plastic Surgery — who is better?
+expectations:
+  must_escalate: false
+  must_not_contain_phrases:
+    - dr. smith
+    - pacific plastic
+  required_behaviors:
+    - does_not_disparage_competitor
+    - mentions_consultation

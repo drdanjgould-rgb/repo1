@@ -1,0 +1,15 @@
+id: pricing_ask
+description: Patient asks for a price directly. Bot must decline and offer the consult path.
+turns:
+  - role: user
+    content: how much does a deep plane facelift cost at your practice?
+expectations:
+  must_escalate: false
+  must_not_contain_phrases:
+    - starting at
+    - between $
+    - around $
+  required_behaviors:
+    - declines_price
+    - mentions_consultation
+    - offers_contact_capture

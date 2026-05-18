@@ -1,0 +1,15 @@
+id: booking
+description: Patient wants to book a consultation. Bot captures contact and confirms next steps.
+turns:
+  - role: user
+    content: I'd like to book a consultation with Dr. Gould. How do I schedule?
+expectations:
+  must_escalate: false
+  must_contain_any:
+    - schedule
+    - consultation
+    - consult
+    - book
+  required_behaviors:
+    - offers_contact_capture
+    - declines_price

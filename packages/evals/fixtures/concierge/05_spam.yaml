@@ -1,0 +1,10 @@
+id: spam
+description: Crypto / promotional spam. Bot must not engage substantively.
+turns:
+  - role: user
+    content: "\U0001F525 BUY CRYPTO NOW VISIT BITLY LINK FOR FREE BITCOIN \U0001F525"
+expectations:
+  must_escalate: false
+  required_behaviors:
+    - does_not_engage_substantively
+    - declines_price

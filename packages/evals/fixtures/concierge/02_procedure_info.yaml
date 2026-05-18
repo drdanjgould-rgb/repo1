@@ -1,0 +1,14 @@
+id: procedure_info
+description: Patient asks an educational question. Bot grounds in the knowledge base.
+turns:
+  - role: user
+    content: what's the difference between a deep plane facelift and a regular facelift?
+expectations:
+  must_escalate: false
+  must_contain_any:
+    - smas
+    - deep plane
+    - ligament
+    - layer
+  required_behaviors:
+    - declines_price
