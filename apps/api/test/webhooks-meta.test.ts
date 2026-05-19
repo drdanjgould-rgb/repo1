@@ -13,6 +13,7 @@ function sign(body: string): string {
 }
 
 interface RecordedEvent {
+  id?: string;
   name: string;
   data: unknown;
 }
@@ -21,7 +22,7 @@ interface RecordedEvent {
 function fakeInngest(): { inngest: Inngest; sent: RecordedEvent[] } {
   const sent: RecordedEvent[] = [];
   const stub = {
-    send: (e: { name: string; data: unknown } | Array<{ name: string; data: unknown }>) => {
+    send: (e: RecordedEvent | RecordedEvent[]) => {
       const events = Array.isArray(e) ? e : [e];
       for (const ev of events) sent.push(ev);
       return Promise.resolve({
@@ -125,6 +126,32 @@ describe('POST /webhooks/meta — normalization & dispatch', () => {
     expect(data.clinicId).toBe(CLINIC_ID);
     expect(data.platformMsgId).toBe('meta-msg-001');
     expect(data.text).toContain('deep plane facelift');
+  });
+
+  it('sets Inngest event id = platformMsgId for cross-retry dedup', async () => {
+    const { app, sent } = buildApp({ live: true });
+    const body = JSON.stringify(inboundPayload());
+    await app.request('/', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-hub-signature-256': sign(body) },
+      body,
+    });
+    expect(sent[0]).toMatchObject({
+      id: 'meta-msg-001',
+      name: 'concierge/inbound.received',
+    });
+  });
+
+  it('threads pageId through as recipientPlatformId', async () => {
+    const { app, sent } = buildApp({ live: true });
+    const body = JSON.stringify(inboundPayload());
+    await app.request('/', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-hub-signature-256': sign(body) },
+      body,
+    });
+    const data = sent[0]?.data as { recipientPlatformId: string };
+    expect(data.recipientPlatformId).toBe(PAGE_ID);
   });
 
   it('does NOT dispatch when liveWebhooksEnabled is false', async () => {

@@ -10,7 +10,7 @@ import type {
   PatientsRepo,
 } from '@contourai/db/repos';
 import type { ConversationPlatform } from '@contourai/db/schema';
-import type { MailchimpClient, SheetsClient } from '@contourai/integrations';
+import type { MailchimpClient, MetaClient, SheetsClient } from '@contourai/integrations';
 import { containsBannedPhrase } from '@contourai/safety';
 import type { ConciergeAgent } from '../agent.js';
 import { HOLDING_REPLY } from '../agent.js';
@@ -24,6 +24,11 @@ export interface InboundDMEvent {
   threadId: string;
   /** Stable platform-side identifier; the key for inbound idempotency. */
   platformMsgId: string;
+  /**
+   * Platform-side recipient id (page id on Meta, account id on TikTok).
+   * Needed to compose the outbound send.
+   */
+  recipientPlatformId: string;
   /** Free-text patient message (raw — orchestrator redacts before persist). */
   text: string;
   /** Sender info — at least one of these so we can resolve / create a patient. */
@@ -49,6 +54,7 @@ export interface OrchestratorDeps {
   integrations: {
     mailchimp: MailchimpClient;
     sheets: SheetsClient;
+    meta: MetaClient;
   };
   clinic: {
     id: string;
@@ -141,7 +147,7 @@ export async function handleInboundDM(
   try {
     reply = await deps.agent.reply(event.text);
   } catch (e) {
-    return await failSafely(deps, conv.id, patient.id, e, now);
+    return await failSafely(deps, conv.id, patient.id, e, now, event);
   }
 
   if (reply.verdict.redFlag) {
@@ -156,12 +162,14 @@ export async function handleInboundDM(
       createdAt: now(),
     });
     await deps.repos.conversations.setStatus({ id: conv.id, status: 'escalated' });
+    const sentMsgId = await sendAndCapture(deps, event, HOLDING_REPLY);
     await deps.repos.messages.insert({
       conversationId: conv.id,
       clinicId: event.clinicId,
       direction: 'outbound',
       role: 'system',
       contentRedacted: HOLDING_REPLY,
+      ...(sentMsgId ? { platformMsgId: sentMsgId } : {}),
       createdAt: now(),
     });
     return {
@@ -180,7 +188,7 @@ export async function handleInboundDM(
   try {
     intent = await classifyIntent(deps.client, event.text);
   } catch (e) {
-    return await failSafely(deps, conv.id, patient.id, e, now);
+    return await failSafely(deps, conv.id, patient.id, e, now, event);
   }
 
   // 6. Spam path: persist nothing else, no reply.
@@ -206,12 +214,14 @@ export async function handleInboundDM(
     });
     finalReply = HOLDING_REPLY;
     await deps.repos.conversations.setStatus({ id: conv.id, status: 'escalated' });
+    const sentId = await sendAndCapture(deps, event, finalReply);
     await deps.repos.messages.insert({
       conversationId: conv.id,
       clinicId: event.clinicId,
       direction: 'outbound',
       role: 'system',
       contentRedacted: finalReply,
+      ...(sentId ? { platformMsgId: sentId } : {}),
       createdAt: now(),
     });
     return {
@@ -278,7 +288,13 @@ export async function handleInboundDM(
     scoredAt: now(),
   });
 
-  // 10. Persist outbound message with the LLM metadata Sonnet returned.
+  // 10. Send via Meta first so we can record the platform message id on
+  //     the outbound row. Best-effort: if Meta fails we still persist the
+  //     row (with platformMsgId=null), so staff can see what we composed
+  //     and retry-send later.
+  const sentMsgId = await sendAndCapture(deps, event, finalReply);
+
+  // 11. Persist outbound message with the LLM metadata Sonnet returned.
   const outboundRedacted = redact(finalReply);
   const outboundRow = await deps.repos.messages.insert({
     conversationId: conv.id,
@@ -288,6 +304,7 @@ export async function handleInboundDM(
     contentRedacted: outboundRedacted.redacted,
     redactionMap: outboundRedacted.map,
     model: 'claude-sonnet-4-6',
+    ...(sentMsgId ? { platformMsgId: sentMsgId } : {}),
     ...(reply.usage
       ? {
           promptTokens: reply.usage.input_tokens,
@@ -403,12 +420,36 @@ async function resolveOrCreateConversation(
   });
 }
 
+/**
+ * Send the reply via the channel client and return the platform message
+ * id on success. Best-effort: any error swallows to null so the caller
+ * persists a row even when delivery fails. The HandleResult itself
+ * reflects orchestrator success; channel-send failures show up in
+ * monitoring via the `platformMsgId` column staying null.
+ */
+async function sendAndCapture(
+  deps: OrchestratorDeps,
+  event: InboundDMEvent,
+  text: string,
+): Promise<string | null> {
+  if (event.platform !== 'instagram') return null;
+  const psid = event.sender.handle ?? event.threadId;
+  if (!psid || !event.recipientPlatformId) return null;
+  const result = await deps.integrations.meta.sendMessage({
+    pageId: event.recipientPlatformId,
+    recipientPsid: psid,
+    text,
+  });
+  return result.ok ? result.value.messageId || null : null;
+}
+
 async function failSafely(
   deps: OrchestratorDeps,
   conversationId: string,
   patientId: string,
   err: unknown,
   now: () => Date,
+  event?: InboundDMEvent,
 ): Promise<HandleResult> {
   const reason = err instanceof Error ? err.message : String(err);
   const esc = await deps.repos.escalations.insert({
@@ -422,12 +463,14 @@ async function failSafely(
     createdAt: now(),
   });
   await deps.repos.conversations.setStatus({ id: conversationId, status: 'escalated' });
+  const sentId = event ? await sendAndCapture(deps, event, HOLDING_REPLY) : null;
   await deps.repos.messages.insert({
     conversationId,
     clinicId: deps.clinic.id,
     direction: 'outbound',
     role: 'system',
     contentRedacted: HOLDING_REPLY,
+    ...(sentId ? { platformMsgId: sentId } : {}),
     createdAt: now(),
   });
   return {

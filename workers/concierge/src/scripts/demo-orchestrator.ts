@@ -16,7 +16,11 @@ import {
   FakeMessagesRepo,
   FakePatientsRepo,
 } from '@contourai/db/test-utils';
-import { FakeMailchimpClient, FakeSheetsClient } from '@contourai/integrations/test-utils';
+import {
+  FakeMailchimpClient,
+  FakeMetaClient,
+  FakeSheetsClient,
+} from '@contourai/integrations/test-utils';
 import { createConciergeAgent } from '../agent.js';
 import {
   handleInboundDM,
@@ -44,6 +48,7 @@ function buildDeps(scenario: 'happy' | 'red_flag' | 'spam'): {
   leadScores: FakeLeadScoresRepo;
   mailchimp: FakeMailchimpClient;
   sheets: FakeSheetsClient;
+  meta: FakeMetaClient;
 } {
   // Script LLM responses so the demo is deterministic.
   // - The agent's reply call (Sonnet, generates patient-facing text).
@@ -90,12 +95,13 @@ function buildDeps(scenario: 'happy' | 'red_flag' | 'spam'): {
   const leadScores = new FakeLeadScoresRepo();
   const mailchimp = new FakeMailchimpClient();
   const sheets = new FakeSheetsClient();
+  const meta = new FakeMetaClient();
 
   const deps: OrchestratorDeps = {
     client,
     agent,
     repos: { conversations, messages, escalations, patients, leads, leadScores },
-    integrations: { mailchimp, sheets },
+    integrations: { mailchimp, sheets, meta },
     clinic: {
       id: CLINIC_ID,
       mailchimpListId: 'list-gould-leads',
@@ -114,6 +120,7 @@ function buildDeps(scenario: 'happy' | 'red_flag' | 'spam'): {
     leadScores,
     mailchimp,
     sheets,
+    meta,
   };
 }
 
@@ -161,6 +168,7 @@ async function runScenario(
   bullet('sheets_appendRow_calls', ctx.sheets.calls.length);
   bullet('mailchimp_upsert_calls', ctx.mailchimp.upsertCalls.length);
   bullet('mailchimp_tag_calls', ctx.mailchimp.tagCalls.length);
+  bullet('meta_send_calls', ctx.meta.sends.length);
 
   if (ctx.messages.rows.length > 0) {
     process.stdout.write('\n  Messages table contents:\n');
@@ -190,6 +198,7 @@ async function main(): Promise<void> {
     platform: 'instagram',
     threadId: 'ig-thread-sarah',
     platformMsgId: 'ig-msg-001',
+    recipientPlatformId: 'ig-page-001',
     text: 'Hi, how much does a deep plane facelift cost with Dr. Gould? I am in LA and looking to schedule something in the next 2 months.',
     sender: {
       handle: '@sarah_j',
@@ -203,6 +212,7 @@ async function main(): Promise<void> {
     platform: 'instagram',
     threadId: 'ig-thread-marie',
     platformMsgId: 'ig-msg-002',
+    recipientPlatformId: 'ig-page-001',
     text: 'I am 5 days post tummy tuck and there is a lot of bleeding through my dressing right now. Should I be worried?',
     sender: {
       handle: '@marie_t',
@@ -216,6 +226,7 @@ async function main(): Promise<void> {
     platform: 'instagram',
     threadId: 'ig-thread-spam',
     platformMsgId: 'ig-msg-003',
+    recipientPlatformId: 'ig-page-001',
     text: '🔥 BUY CRYPTO NOW VISIT BITLY LINK FOR FREE BITCOIN 🔥',
     sender: { handle: '@spammer123' },
   });

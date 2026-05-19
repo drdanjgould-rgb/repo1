@@ -9,7 +9,11 @@ import {
   FakeMessagesRepo,
   FakePatientsRepo,
 } from '@contourai/db/test-utils';
-import { FakeMailchimpClient, FakeSheetsClient } from '@contourai/integrations/test-utils';
+import {
+  FakeMailchimpClient,
+  FakeMetaClient,
+  FakeSheetsClient,
+} from '@contourai/integrations/test-utils';
 import {
   createConciergeAgent,
   handleInboundDM,
@@ -49,7 +53,11 @@ function buildDeps(): { deps: OrchestratorDeps; sheets: FakeSheetsClient } {
         leads: new FakeLeadsRepo(),
         leadScores: new FakeLeadScoresRepo(),
       },
-      integrations: { mailchimp: new FakeMailchimpClient(), sheets },
+      integrations: {
+        mailchimp: new FakeMailchimpClient(),
+        sheets,
+        meta: new FakeMetaClient(),
+      },
       clinic: {
         id: CLINIC,
         mailchimpListId: 'list-1',
@@ -72,6 +80,7 @@ describe('Inngest binding — orchestrator integration', () => {
       platform: 'instagram',
       threadId: 'patient-igsid-001',
       platformMsgId: 'meta-msg-001',
+      recipientPlatformId: 'ig-page-001',
       text: 'I would like to book a consult, what is the best way to reach Dr. Gould?',
       sender: { handle: 'patient-igsid-001', email: 'sarah@example.com' },
     });

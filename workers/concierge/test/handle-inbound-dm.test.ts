@@ -9,7 +9,11 @@ import {
   FakeMessagesRepo,
   FakePatientsRepo,
 } from '@contourai/db/test-utils';
-import { FakeMailchimpClient, FakeSheetsClient } from '@contourai/integrations/test-utils';
+import {
+  FakeMailchimpClient,
+  FakeMetaClient,
+  FakeSheetsClient,
+} from '@contourai/integrations/test-utils';
 import { createConciergeAgent } from '../src/agent.js';
 import {
   handleInboundDM,
@@ -29,6 +33,7 @@ interface Setup {
   leadScores: FakeLeadScoresRepo;
   mailchimp: FakeMailchimpClient;
   sheets: FakeSheetsClient;
+  meta: FakeMetaClient;
   transport: FakeTransport;
 }
 
@@ -70,12 +75,13 @@ function setup(args: {
   const leadScores = new FakeLeadScoresRepo();
   const mailchimp = new FakeMailchimpClient();
   const sheets = new FakeSheetsClient();
+  const meta = new FakeMetaClient();
 
   const deps: OrchestratorDeps = {
     client,
     agent,
     repos: { conversations, messages, escalations, patients, leads, leadScores },
-    integrations: { mailchimp, sheets },
+    integrations: { mailchimp, sheets, meta },
     clinic: {
       id: CLINIC,
       mailchimpListId: 'list-1',
@@ -93,6 +99,7 @@ function setup(args: {
     leadScores,
     mailchimp,
     sheets,
+    meta,
     transport,
   };
 }
@@ -103,6 +110,7 @@ function inbound(overrides: Partial<InboundDMEvent> = {}): InboundDMEvent {
     platform: 'instagram',
     threadId: 'ig-thread-1',
     platformMsgId: 'meta-msg-1',
+    recipientPlatformId: 'ig-page-001',
     text: 'hi, how much is a deep plane facelift?',
     sender: { email: 'sarah@example.com', displayName: 'Sarah Johnson' },
     ...overrides,

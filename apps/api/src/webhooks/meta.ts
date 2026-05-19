@@ -67,7 +67,13 @@ export function metaWebhookApp(deps: MetaWebhookDeps): Hono {
     // Fire and forget into Inngest. Meta requires a 200 within 10s.
     for (const ev of events) {
       try {
-        await deps.inngest.send({ name: 'concierge/inbound.received', data: ev });
+        // Use platformMsgId as the Inngest event id so Meta webhook retries
+        // (same mid twice) are deduplicated at the event-queue layer.
+        await deps.inngest.send({
+          id: ev.platformMsgId,
+          name: 'concierge/inbound.received',
+          data: ev,
+        });
       } catch (e) {
         log('error', 'inngest_send_failed', {
           err: e instanceof Error ? e.message : String(e),
@@ -113,6 +119,7 @@ export function normalizeMetaPayload(
       const ev = parseMessagingEvent(m as Record<string, unknown>, {
         clinicId,
         platform,
+        pageId,
       });
       if (ev) out.push(ev);
     }
@@ -122,7 +129,7 @@ export function normalizeMetaPayload(
 
 function parseMessagingEvent(
   m: Record<string, unknown>,
-  ctx: { clinicId: string; platform: ConversationPlatform },
+  ctx: { clinicId: string; platform: ConversationPlatform; pageId: string },
 ): InboundDMEvent | null {
   const sender = m['sender'];
   const message = m['message'];
@@ -146,6 +153,7 @@ function parseMessagingEvent(
     platform: ctx.platform,
     threadId: senderId,
     platformMsgId,
+    recipientPlatformId: ctx.pageId,
     text,
     sender: { handle: senderId },
   };
