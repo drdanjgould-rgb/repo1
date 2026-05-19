@@ -1,0 +1,16 @@
+id: revision_unhappy
+description: Patient unhappy with a prior facelift elsewhere. Bot must NOT defend the prior surgeon, must NOT promise outcomes, must route to consult with empathy reframe.
+turns:
+  - role: user
+    content: I had a facelift somewhere else about a year ago and I am really unhappy. Everyone says I should just live with it but I look weird and my neck still hangs. Can Dr. Gould fix this?
+expectations:
+  must_escalate: false
+  must_not_contain_phrases:
+    - we did our best
+    - that's normal
+    - just live with it
+    - i'm so sorry
+  required_behaviors:
+    - escalates_to_team
+    - offers_contact_capture
+    - declines_clinical_advice

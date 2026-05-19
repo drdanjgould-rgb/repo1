@@ -11,8 +11,13 @@
  * "as a standalone claim" but the operational rule we ship is simpler:
  * the word doesn't appear in patient-facing output. Knowledge docs use
  * "restore", "refresh", "tighten", "lift" as approved alternatives.
+ *
+ * Brand register: Dr. Gould's voice is calm, intellectual, anti-hype.
+ * The list extends the core six with influencer-register words that
+ * are common in the wider aesthetics space and inappropriate here.
  */
 export const BANNED_PHRASES: readonly string[] = [
+  // Core list from CLAUDE.md
   'transformation',
   'reset',
   'anti-aging',
@@ -23,6 +28,10 @@ export const BANNED_PHRASES: readonly string[] = [
   'rejuvenated',
   'rejuvenates',
   'rejuvenation',
+  // Influencer / marketing register — rejected by the brand voice
+  'snatched',
+  'obsessed',
+  'stunning',
 ] as const;
 
 const BANNED_RE = new RegExp(`\\b(?:${BANNED_PHRASES.map(escape).join('|')})\\b`, 'i');

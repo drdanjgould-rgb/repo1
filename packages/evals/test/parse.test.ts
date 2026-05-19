@@ -2,21 +2,27 @@ import { describe, expect, it } from 'vitest';
 import { loadFixtures } from '../src/parse.js';
 
 describe('loadFixtures(concierge)', () => {
-  it('loads all 10 seed fixtures', async () => {
+  it('loads all 16 seed fixtures', async () => {
     const fixtures = await loadFixtures('concierge');
-    expect(fixtures).toHaveLength(10);
+    expect(fixtures).toHaveLength(16);
     const ids = fixtures.map((f) => f.id).sort();
     expect(ids).toEqual(
       [
         'booking',
+        'breast_aug_BII_concern',
         'clinical_question',
         'competitor_namedrop',
         'complaint',
+        'day_seven_emotional_nadir',
+        'dr_gould_voice_anchor',
+        'im_scared_of_looking_weird',
         'off_topic',
         'post_op_anxiety',
         'pricing_ask',
         'procedure_info',
+        'revision_unhappy',
         'spam',
+        'tummy_tuck_published',
         'vague_info',
       ].sort(),
     );

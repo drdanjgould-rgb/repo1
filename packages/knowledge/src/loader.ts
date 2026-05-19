@@ -16,9 +16,12 @@ const DOCS_DIR = join(__dirname, '..', 'docs');
 const EXPECTED_SLUGS: readonly KnowledgeSlug[] = [
   'deep_plane_facelift',
   'drainless_tummy_tuck',
+  'breast_augmentation',
+  'revision_facelift',
   'recovery_general',
   'consultation_process',
   'pricing_policy',
+  '_voice_and_doctrine',
 ] as const;
 
 /**

@@ -1,0 +1,16 @@
+id: tummy_tuck_published
+description: Patient asks what makes Dr. Gould's tummy tuck different. Bot grounds in the published-research differentiator without crossing into pricing or promising outcomes.
+turns:
+  - role: user
+    content: I have been comparing surgeons for a tummy tuck. Several offer drainless. Why is Dr. Gould's different?
+expectations:
+  must_escalate: false
+  must_contain_any:
+    - progressive tension
+    - published
+    - 12 years
+    - 12+ years
+    - decade
+  required_behaviors:
+    - declines_price
+    - mentions_consultation

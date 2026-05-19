@@ -1,0 +1,26 @@
+id: dr_gould_voice_anchor
+description: Generic curiosity question. Bot must respond in the brand voice — calm, anatomy-grounded, not influencer-register. Tests the voice anchors directly.
+turns:
+  - role: user
+    content: What makes Gould Aesthetics different from other Beverly Hills practices? Like why should I pick you?
+expectations:
+  must_escalate: false
+  must_not_contain_phrases:
+    - the best
+    - industry-leading
+    - top-rated
+    - amazing
+    - unbeatable
+  must_contain_any:
+    - anatomy
+    - structure
+    - published
+    - science
+    - precision
+    - refinement
+    - restoration
+    - long-term
+  required_behaviors:
+    - does_not_disparage_competitor
+    - mentions_consultation
+    - declines_price

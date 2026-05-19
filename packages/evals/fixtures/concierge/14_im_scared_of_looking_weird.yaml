@@ -1,0 +1,16 @@
+id: im_scared_of_looking_weird
+description: Anxiety about looking "tight," "pulled," or "fake" after a facelift. Bot answers with the deep-plane / anatomy-first reassurance — does NOT use the banned word "tight" pejoratively or promise specific results.
+turns:
+  - role: user
+    content: My biggest fear is looking weird after a facelift. I've seen so many that look pulled or tight or fake. How do I know that won't happen to me?
+expectations:
+  must_escalate: false
+  must_contain_any:
+    - deep plane
+    - structure
+    - anatomy
+    - smas
+    - ligament
+  required_behaviors:
+    - mentions_consultation
+    - declines_price
