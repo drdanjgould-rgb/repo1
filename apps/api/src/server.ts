@@ -131,9 +131,30 @@ const app = createApp({
     liveWebhooksEnabled: config.liveWebhooksEnabled,
   },
   getOrchestratorDeps,
+  // Console mounts only when STAFF_API_TOKEN is set. Reuses the orchestrator
+  // DB pool via the same lazy factory.
+  ...(config.staffApiToken
+    ? {
+        console: {
+          staffApiToken: config.staffApiToken,
+          getDeps: () => {
+            const o = getOrchestratorDeps();
+            return {
+              repos: {
+                conversations: o.repos.conversations,
+                messages: o.repos.messages,
+                escalations: o.repos.escalations,
+                leads: o.repos.leads,
+              },
+              clinic: { id: o.clinic.id },
+            };
+          },
+        },
+      }
+    : {}),
 });
 
 process.stdout.write(
-  `ContourAI API listening on :${config.port} (live=${config.liveWebhooksEnabled})\n`,
+  `ContourAI API listening on :${config.port} (live=${config.liveWebhooksEnabled}, console=${config.staffApiToken ? 'on' : 'off'})\n`,
 );
 serve({ fetch: app.fetch, port: config.port });

@@ -1,7 +1,7 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, count, desc, eq, gte } from 'drizzle-orm';
 import type { Database } from '../client.js';
 import { leads } from '../schema/leads.js';
-import type { Lead, NewLead } from '../schema/leads.js';
+import type { Lead, LeadTier, NewLead } from '../schema/leads.js';
 
 export interface LeadsRepo {
   /** Open (status='open') lead for a patient, most recent first. */
@@ -17,6 +17,10 @@ export interface LeadsRepo {
     rawContactRedacted?: string;
   }): Promise<void>;
   setStatus(args: { id: string; status: Lead['status'] }): Promise<void>;
+  /** All leads for a clinic, newest first (staff console). */
+  listRecent(args: { clinicId: string; limit: number; tier?: LeadTier }): Promise<Lead[]>;
+  /** Counts grouped by tier for leads created on/after `since`. */
+  countByTierSince(args: { clinicId: string; since: Date }): Promise<Record<LeadTier, number>>;
 }
 
 export function drizzleLeadsRepo(db: Database): LeadsRepo {
@@ -54,6 +58,29 @@ export function drizzleLeadsRepo(db: Database): LeadsRepo {
 
     async setStatus({ id, status }) {
       await db.update(leads).set({ status, lastTouchedAt: new Date() }).where(eq(leads.id, id));
+    },
+
+    async listRecent({ clinicId, limit, tier }) {
+      const where = tier
+        ? and(eq(leads.clinicId, clinicId), eq(leads.tier, tier))
+        : eq(leads.clinicId, clinicId);
+      return db
+        .select()
+        .from(leads)
+        .where(where)
+        .orderBy(desc(leads.lastTouchedAt), desc(leads.createdAt))
+        .limit(limit);
+    },
+
+    async countByTierSince({ clinicId, since }) {
+      const rows = await db
+        .select({ tier: leads.tier, n: count() })
+        .from(leads)
+        .where(and(eq(leads.clinicId, clinicId), gte(leads.createdAt, since)))
+        .groupBy(leads.tier);
+      const out: Record<LeadTier, number> = { hot: 0, warm: 0, cold: 0, blocked: 0 };
+      for (const r of rows) out[r.tier] = r.n;
+      return out;
     },
   };
 }

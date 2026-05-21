@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Lead, NewLead } from '../../schema/leads.js';
+import type { Lead, LeadTier, NewLead } from '../../schema/leads.js';
 import type { LeadsRepo } from '../leads.js';
 
 export class FakeLeadsRepo implements LeadsRepo {
@@ -64,5 +64,26 @@ export class FakeLeadsRepo implements LeadsRepo {
     if (!l) return Promise.resolve();
     this.byId.set(id, { ...l, status, lastTouchedAt: new Date() });
     return Promise.resolve();
+  }
+
+  listRecent({ clinicId, limit, tier }: { clinicId: string; limit: number; tier?: LeadTier }) {
+    const subset = [...this.byId.values()]
+      .filter((l) => l.clinicId === clinicId && (tier ? l.tier === tier : true))
+      .sort((a, b) => {
+        const at = a.lastTouchedAt?.getTime() ?? a.createdAt.getTime();
+        const bt = b.lastTouchedAt?.getTime() ?? b.createdAt.getTime();
+        return bt - at;
+      });
+    return Promise.resolve(subset.slice(0, limit));
+  }
+
+  countByTierSince({ clinicId, since }: { clinicId: string; since: Date }) {
+    const out: Record<LeadTier, number> = { hot: 0, warm: 0, cold: 0, blocked: 0 };
+    for (const l of this.byId.values()) {
+      if (l.clinicId === clinicId && l.createdAt.getTime() >= since.getTime()) {
+        out[l.tier] += 1;
+      }
+    }
+    return Promise.resolve(out);
   }
 }

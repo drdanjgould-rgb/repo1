@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #fafaf8;
+  --fg: #0c0e12;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+/* Subtle dotted background for the empty states */
+.bg-dotted {
+  background-image: radial-gradient(rgba(12, 14, 18, 0.06) 1px, transparent 1px);
+  background-size: 16px 16px;
+}

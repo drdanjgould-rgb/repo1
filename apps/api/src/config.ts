@@ -23,6 +23,8 @@ export interface ApiConfig {
   };
   /** Map Meta page IDs → ContourAI clinic UUIDs. Provisional until ClinicsRepo lookup lands. */
   clinicByMetaPageId: Record<string, string>;
+  /** Staff console bearer token. Empty disables console routes. */
+  staffApiToken: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
@@ -42,6 +44,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
       signingKey: env['INNGEST_SIGNING_KEY'] ?? '',
     },
     clinicByMetaPageId: parseMap(env['META_PAGE_TO_CLINIC_JSON']),
+    staffApiToken: env['STAFF_API_TOKEN'] ?? '',
   };
 }
 

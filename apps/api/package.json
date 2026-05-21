@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "clean": "rm -rf dist .turbo *.tsbuildinfo",
     "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts"
+    "start": "tsx src/server.ts",
+    "seed:demo": "tsx src/console/seed-demo.ts"
   },
   "dependencies": {
     "@contourai/agents": "workspace:*",

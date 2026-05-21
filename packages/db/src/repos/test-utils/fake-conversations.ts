@@ -22,6 +22,11 @@ export class FakeConversationsRepo implements ConversationsRepo {
     return Promise.resolve(null);
   }
 
+  findById({ id, clinicId }: { id: string; clinicId: string }) {
+    const c = this.byId.get(id);
+    return Promise.resolve(c && c.clinicId === clinicId ? c : null);
+  }
+
   async create(args: NewConversation): Promise<Conversation> {
     const row: Conversation = {
       id: randomUUID(),
@@ -59,5 +64,34 @@ export class FakeConversationsRepo implements ConversationsRepo {
     const c = this.byId.get(id);
     if (c) this.byId.set(id, { ...c, status });
     return Promise.resolve();
+  }
+
+  listRecent({
+    clinicId,
+    limit,
+    status,
+  }: {
+    clinicId: string;
+    limit: number;
+    status?: Conversation['status'];
+  }) {
+    const subset = [...this.byId.values()]
+      .filter((c) => c.clinicId === clinicId && (status ? c.status === status : true))
+      .sort((a, b) => {
+        const at = a.lastMessageAt?.getTime() ?? a.createdAt.getTime();
+        const bt = b.lastMessageAt?.getTime() ?? b.createdAt.getTime();
+        return bt - at;
+      });
+    return Promise.resolve(subset.slice(0, limit));
+  }
+
+  countSince({ clinicId, since }: { clinicId: string; since: Date }) {
+    const n = [...this.byId.values()].filter(
+      (c) =>
+        c.clinicId === clinicId &&
+        c.lastMessageAt !== null &&
+        c.lastMessageAt.getTime() >= since.getTime(),
+    ).length;
+    return Promise.resolve(n);
   }
 }
